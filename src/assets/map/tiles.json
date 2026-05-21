@@ -1,0 +1,39 @@
+{
+    "tiles": [
+        {
+            "id": 1,
+            "name": "Grass",
+            "image": "grass.png",
+            "placeholderColor": "green",
+            "walkable": true
+        },
+        {
+            "id": 2,
+            "name": "Water",
+            "image": "water.png",
+            "placeholderColor": "blue",
+            "walkable": false
+        },
+        {
+            "id": 3,
+            "name": "Mountain",
+            "image": "mountain.png",
+            "placeholderColor": "gray",
+            "walkable": false
+        },
+        {
+            "id": 4,
+            "name": "Forest",
+            "image": "forest.png",
+            "placeholderColor": "darkgreen",
+            "walkable": true
+        },
+        {
+            "id": 5,
+            "name": "Fertile Land",
+            "image": "fertile_land.png",
+            "placeholderColor": "lightgreen",
+            "walkable": true
+        }
+    ]
+}
