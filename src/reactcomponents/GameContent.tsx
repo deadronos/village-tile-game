@@ -1,8 +1,11 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { ECSContext } from '../ecs/ecsProvider';
-import { ECS, type GameMapStateEntity } from '../ecs/ecsImpl';
+import { ECS } from '../ecs/ecsImpl';
+import type { GameMapStateEntity } from '../ecs/ecsImpl';
 import { Text } from '@react-three/drei';
 import { loadMap } from '../../public/assets/map/loadMap';
+import type { GameStateEntity, Entity } from '../ecs/ecs';
+import GameMap from './GameMap';
 
 
 
@@ -13,29 +16,33 @@ export function GameContent(): React.ReactElement {
     if (!world) {
         throw new Error("GameContent must be used within an ECSProvider")
     }
-    const [hasLoaded, setHasLoaded] = React.useState(false);
+    const [mapHasLoaded, setMapHasLoaded] = React.useState(false);
     
-    if (!hasLoaded) {
-        // Simulate loading time for demonstration purposes
-        const MapEntity=world.add({id: 1, mapState: "unloaded", map: null}as GameMapStateEntity);
-        loadMap(MapEntity);
-        setHasLoaded(true);
-    }
+    const gameState = world.entities.find((entity): entity is GameStateEntity => 'gameTick' in entity);
+    
+
+    useEffect(() => {
+        if (!mapHasLoaded) {
+            // Simulate loading time for demonstration purposes
+            const MapEntity=world.add({id: 1, mapState: "unloaded", map: null}as GameMapStateEntity);
+            loadMap(MapEntity);
+            setMapHasLoaded(true);
+            if (!gameState) {
+                console.error("GameStateEntity not found in world after loading map.");
+                return;
+            }
+            gameState.gameMap = MapEntity;
+            console.log('map loaded, updating state to trigger re-render', MapEntity);
+            console.log('current game state after loading map:', gameState);
+        }
+    }, [mapHasLoaded, world]);
+
+    
 
     return (
         <group>
             {/* Game content will go here */}
-            <ECS.Entities entities={world.entities}>
-                {entity => (
-                    <group key={entity.id}>
-                        {/* Render entity based on its components */}
-                        <Text position={[0-entity.id*5, 0, -10]} fontSize={0.5} color="white">
-                            Entity ID: {entity.id}
-                        </Text>
-                        {/* For example, if it has a position component, render it at that position */}
-                    </group>
-                )}
-            </ECS.Entities>
+            <GameMap hasLoaded={mapHasLoaded} gameState={gameState}/>
         </group>
     )
 }
