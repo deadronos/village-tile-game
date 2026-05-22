@@ -55,8 +55,23 @@ export interface VelocityEntity extends Entity {
 }
 
 export interface GameMapEntity extends Entity {
-    tileset: string
+    tileset: TilesEntity
     tilemap: number[][]
+    mapPreset: string
+    height: number
+    width: number
+}
+
+export interface TilesEntity extends Entity {
+    tiles:TileEntity[]
+}
+
+export interface TileEntity extends Entity {
+    id: number
+    name: string
+    image: string
+    placeholderColor: string
+    walkable: boolean
 }
 
 export interface GameMapStateEntity extends Entity {

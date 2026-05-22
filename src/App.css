@@ -1,0 +1,29 @@
+
+.App {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+}
+
+.game-title {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.game-canvas {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  border: 1px solid #ccc;
+  background-color: black;
+}
