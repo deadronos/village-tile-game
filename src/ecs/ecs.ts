@@ -34,6 +34,10 @@ export interface GameStateEntity extends Entity {
     observers: ObserverEntity[]  // will usually only have one observer, but this allows for split-screen multiplayer or multiple camera angles in the future
     gamePawns: PawnEntity[]
     gameObjects: ObjectEntity[] // for things like crops, furniture, etc that aren't actors or pawns but still need to be ticked and rendered
+    currentHour: number
+    currentDay: number
+    sunLightLevel: number
+    season: "spring" | "summer" | "autumn" | "winter"
     registerEntityToTick: (entityId: number, gameState: GameStateEntity) => void
     unregisterEntityToTick: (entityId: number, gameState: GameStateEntity) => void
 }
@@ -84,7 +88,7 @@ export interface ActorEntity extends Entity {
     isActive?: boolean
     pawnToActOn?: PawnEntity | null
     controller?: ControllerEntity | null
-    queuedActions?:Record<number, ActionTypes>
+    queuedActions?: ActionTypes[]
     onTick(delta: number, gameTick: number): void
     isRegisteredToGameTick: boolean
 }
@@ -94,7 +98,7 @@ export interface ActionTypes {
     targetPosition?: PositionEntity
     targetActor?: ActorEntity
     targetPawn?: PawnEntity
-    interactionType?: "plant" | "checkGrowth" | "harvest"
+    interactionType?: "plant" | "checkGrowth" | "harvest" | "deposit" | "refillWater" | "water"
     waitDuration?: number // in seconds
 }
 

@@ -1,8 +1,6 @@
-import React, { useEffect } from 'react'
-import { useECSWorld } from '../ecs/ecsImpl';
-import type { GameMapStateEntity } from '../ecs/ecsImpl';
+import React, { useEffect } from 'react';
 import type { GameStateEntity, TileEntity } from '../ecs/ecs';
-import { Text } from '@react-three/drei'
+import { Text } from '@react-three/drei';
 
 
 interface GameMapProps {

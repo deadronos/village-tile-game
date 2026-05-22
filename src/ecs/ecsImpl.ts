@@ -1,6 +1,6 @@
 
 
-import { world, ECS, type ObserverEntity, type ActorEntity, type GameMapStateEntity, type ObjectEntity, type PawnEntity, useECSWorld, type Entity, type GameStateEntity } from "./ecs";
+import { world, ECS, type ObserverEntity, type ActorEntity, type GameMapStateEntity, type ObjectEntity, type PawnEntity, useECSWorld } from "./ecs";
 
 
 
@@ -19,6 +19,10 @@ export type GameStateEntityImpl= {
     observers: ObserverEntity[]  // will usually only have one observer, but this allows for split-screen multiplayer or multiple camera angles in the future
     gamePawns: PawnEntity[]
     gameObjects: ObjectEntity[] // for things like crops, furniture, etc that aren't actors or pawns but still need to be ticked and rendered
+    currentHour: number
+    currentDay: number
+    sunLightLevel: number
+    season: "spring" | "summer" | "autumn" | "winter"
     registerEntityToTick: (entityId: number, gameState: GameStateEntityImpl) => void
     unregisterEntityToTick: (entityId: number, gameState: GameStateEntityImpl) => void
 }
@@ -46,6 +50,10 @@ export function createInitialGameStateEntityImpl(): GameStateEntityImpl {
         observers: [],
         gamePawns: [],
         gameObjects: [],
+        currentHour: 6,
+        currentDay: 1,
+        sunLightLevel: 0.5,
+        season: "spring",
         registerEntityToTick: (entityId: number, gameState:GameStateEntityImpl) => {
             gameState.registeredEntitiesToTick.add(entityId)
         },

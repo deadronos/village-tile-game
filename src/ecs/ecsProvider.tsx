@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect } from 'react'
 import * as ECS from './ecsImpl'
-import { createInitialGameStateEntityImpl, world } from './ecsImpl'
+import { createInitialGameStateEntityImpl } from './ecsImpl'
 import type { GameStateEntity } from './ecs'
 
 
@@ -13,7 +13,6 @@ export function ECSProvider({ children }: { children: React.ReactNode }):React.R
     
     
     const providedWorld= ECS.useECSWorld();
-    let gameStateEntity:GameStateEntity;
 
     if (!providedWorld) {
         throw new Error("ECSProvider must be used within an ECSContext.Provider")
@@ -26,7 +25,7 @@ export function ECSProvider({ children }: { children: React.ReactNode }):React.R
             console.log('No entities found in world, creating initial game state entity')
             const initialGameStateEntityImpl= (createInitialGameStateEntityImpl() as GameStateEntity);
             console.log('initial game state entity implementation:', initialGameStateEntityImpl);
-            gameStateEntity=providedWorld.add(initialGameStateEntityImpl);
+            providedWorld.add(initialGameStateEntityImpl);
             
         } else {
             // entities already exist, likely due to hot module replacement during development, so we should not create a new initial game state entity

@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import React from 'react'
 import { Canvas } from '@react-three/fiber'
 import './App.css'
 import { ECSProvider } from './ecs/ecsProvider'
@@ -13,8 +12,6 @@ function CanvasWrappedInECSProvider() {
       <Suspense fallback={<div>Loading...</div>}>
         <HudUI />
         <Canvas className="game-canvas">
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} />
           <OrbitControls />
           <GameContent />
         </Canvas>
@@ -26,13 +23,8 @@ function CanvasWrappedInECSProvider() {
 
 
 function App() {
-  
-
   return (
     <div className="App">
-      <div className="game-title">
-        <h1>Village Tile Game</h1>
-      </div>
       <Suspense fallback={<div>Loading...</div>}>
         <CanvasWrappedInECSProvider />
       </Suspense>

@@ -1,151 +1,143 @@
-import React, { useContext,useEffect } from 'react';
-import { ECSContext } from '../ecs/ecsProvider';
-import type { TileEntity, GameStateEntity, PawnEntity, ControllerEntity, ObjectEntity, PlantEntity } from '../ecs/ecs';
-import * as THREE from 'three';
-import { getCachedYOffsetForGeometry } from './utils/CachedYOffsetForGeometry';
-
-
+import React, { useContext, useRef } from "react";
+import { ECSContext } from "../ecs/ecsProvider";
+import type { PawnEntity, GameStateEntity, ActorEntity } from "../ecs/ecs";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { Html } from "@react-three/drei";
+import { getWaterCan, getInventoryItem } from "./utils/farmerAISystem";
 
 interface GamePawnsProps {
     maphasLoaded: boolean;
     gameState: GameStateEntity | undefined;
 }
 
-
-export default function GamePawns({ maphasLoaded, gameState }: GamePawnsProps): React.ReactElement {
+export default function GamePawns({ maphasLoaded, gameState }: GamePawnsProps): React.ReactElement | null {
     const world = useContext(ECSContext);
-    const [tiles, setTiles] = React.useState<TileEntity[]| null>(null);
-    const tilesizeX= 1  // in R3F world units, which are equivalent to tiles in our game logic, so 1 means 1 tile
-    const tilesizeY= 1  // in R3F world units, which are equivalent to tiles in our game logic, so 1 means 1 tile
-    const [tilemap, setTilemap] = React.useState<number[][] | null>(null);
-    const [mapHeight, setMapHeight] = React.useState<number>(0);
-    const [mapWidth, setMapWidth] = React.useState<number>(0);
-    const [gameObjects, setGameObjects] = React.useState<Record<number, (ObjectEntity|PlantEntity)>>({});
-    const [pawns, setPawns] = React.useState<PawnEntity[]>([]);
-    const [controllers, setControllers] = React.useState<ControllerEntity[]>([]);
+    if (!world || !maphasLoaded || !gameState) return null;
 
-    if (!world) {
-        throw new Error("GamePawns must be used within an ECSProvider")
-    }
+    // Get all pawn entities in the world
+    const pawns = world.entities.filter((e): e is PawnEntity => 
+        "position" in e && 
+        !("growthStage" in e) && 
+        (e as any).name !== "Barn" && 
+        (e as any).name !== "Well"
+    );
 
-    function updateObjectsFromGameState() {
-        if(!gameState) {
-            console.error("GameStateEntity is undefined in GamePawns component");
-            return;
-        }
-        if(!gameState.gameObjects || gameState.gameObjects.length === 0) {
-            console.log("No game objects found in GameStateEntity to update in GamePawns component");
-            return;
-        }
-        const newObjects = gameState.gameObjects;
-        const newObjectsMap: Record<number, (ObjectEntity|PlantEntity)> = {};
-        newObjects.forEach(obj => {
-            if(!obj.id) {
-                console.error("Game object entity is missing id property, cannot track in GamePawns component", obj);
-                return;
+    function PawnView({ pawn }: { pawn: PawnEntity }): React.ReactElement | null {
+        const groupRef = useRef<THREE.Group>(null);
+
+        // Find the actor associated with this pawn
+        const actor = world.entities.find((e): e is ActorEntity => 
+            "pawnToActOn" in e && (e as any).pawnToActOn?.id === pawn.id
+        );
+
+        // Determine current action status
+        let statusText = "Idling";
+        if (actor?.queuedActions && actor.queuedActions.length > 0) {
+            const nextAction = actor.queuedActions[0];
+            if (nextAction.type === "move") {
+                statusText = "🚶 Moving";
+            } else if (nextAction.type === "wait") {
+                statusText = "😴 Resting";
+            } else if (nextAction.type === "interact") {
+                const iType = nextAction.interactionType;
+                if (iType === "plant") statusText = "🌱 Planting seed";
+                else if (iType === "water") statusText = "💧 Watering crop";
+                else if (iType === "harvest") statusText = "🌾 Harvesting crop";
+                else if (iType === "deposit") statusText = "📦 Depositing wheat";
+                else if (iType === "refillWater") statusText = "🚰 Refilling water";
             }
-            newObjectsMap[obj.id] = obj;
+        }
+
+        // Get inventory details
+        const waterCan = getWaterCan(pawn);
+        const waterCurrent = waterCan?.waterCanCurrentAmount ?? 0;
+        const waterCap = waterCan?.waterCanCapacity ?? 5;
+
+        const seeds = getInventoryItem(pawn, "seed", "wheat")?.quantity ?? 0;
+        const wheat = getInventoryItem(pawn, "crop", "wheat")?.quantity ?? 0;
+
+        // Visual interpolation loop
+        useFrame((_state, delta) => {
+            if (groupRef.current && pawn.position) {
+                const targetX = pawn.position.x;
+                const targetZ = pawn.position.y; // logical Y maps to 3D Z
+
+                // Lerp current 3D position towards target logical grid coordinates
+                groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, delta * 6);
+                groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, delta * 6);
+            }
         });
-        setGameObjects(newObjectsMap);
-    };
 
-    // checking if passed props have state defined and extract tileset and tilemap data from loaded map
-    useEffect(() => {
-            if(!gameState) {
-                console.error("GameStateEntity is undefined in GamePawns component");
-                return;
-            }
-            if(!maphasLoaded) {
-                console.log('GamePawns component detected map has not loaded yet');
-                return;
-            }
-            if(!gameState.gameMap) {
-                console.error("GameStateEntity does not have gameMap property set after map has loaded");
-                return;
-            }
-            if(!gameState.gameMap.map) {
-                console.error("GameMapEntity is null in GameStateEntity after map has loaded");
-                return;
-            }
-            console.log('GamePawns component detected map has loaded, extracting tileset');
-            const loadedTiles=gameState.gameMap.map.tileset.tiles;
-            if(!loadedTiles || loadedTiles.length === 0) {
-                console.error("No tiles found in loaded map's tileset");
-                return;
-            }
-            setTiles(loadedTiles);
-            if(!gameState.gameMap.map.tilemap) {
-                console.error("Tilemap data is missing in loaded GameMapEntity");
-                return;
-            }
-            setTilemap(gameState.gameMap.map.tilemap);
-            setMapHeight(gameState.gameMap.map.tilemap.length);
-            setMapWidth(gameState.gameMap.map.tilemap[0].length);
-            return () => {
-                console.log('GamePawns component unmounted');
-            }
-        }, [maphasLoaded, gameState]);
+        // Initialize 3D position if it's the first frame
+        const initialX = pawn.position?.x ?? 0;
+        const initialZ = pawn.position?.y ?? 0;
 
-    useEffect(()=>{
-            if(tiles) {
-                console.log('GamePawns component has tiles available:', tiles);
-            } else {
-                console.log('GamePawns component has no tiles to display');
-                return;
-            }
-            if(tilemap) {
-                console.log('GamePawns component has tilemap data available:', tilemap);
-            } else {
-                console.log('GamePawns component has no tilemap data to display');
-                return;
-            }
-            if(mapHeight > 0 && mapWidth > 0) {
-                console.log(`GamePawns component has map dimensions: width=${mapWidth}, height=${mapHeight}`);
-            } else {
-                console.log('GamePawns component has invalid map dimensions');
-                return;
-            }
-            updateObjectsFromGameState();
-            return () => {
-                console.log('Cleaning up GamePawns component tiles effect');
-            }
-        }, [tiles, tilemap, mapHeight, mapWidth]); // on change to tiles, tilemap, mapheight, or mapwidth
-
-    useEffect(() => {
-        updateObjectsFromGameState();
-    }, [gameState?.gameObjects]); // on change to gameState's gameObjects array
-
-
-    function PawnView({pawn}: {pawn: PawnEntity}): React.ReactElement | null {
-        if(!pawn.mesh) {
-            console.error("Pawn entity is missing mesh property, cannot render in GamePawns component", pawn);
-            return (
-                <mesh position={[0, getCachedYOffsetForGeometry(new THREE.BoxGeometry(0.8, 1.6, 0.8)), 0]}>
-                    <boxGeometry args={[0.8, 1.6, 0.8]} />
-                    <meshBasicMaterial color="blue" />
-                    <mesh position={[0, getCachedYOffsetForGeometry(new THREE.BoxGeometry(0.4, 0.4, 0.8))+0.6, 0]}>
-                        <capsuleGeometry args={[0.4, 0.4, 0.8]}/>
-                        <meshBasicMaterial color="red" />
-                    </mesh>
-                </mesh>
-            )
-        }
-        if(!pawn.position) {
-            console.error("Pawn entity is missing position property, cannot render in GamePawns component", pawn);
-            return null;
-        }
         return (
-            <group key={pawn.id} position={[pawn.position.x * tilesizeX, getCachedYOffsetForGeometry(pawn.mesh.geometry as THREE.BoxGeometry), pawn.position.y * tilesizeY]}>
-                <primitive object={pawn.mesh} />
+            <group ref={groupRef} position={[initialX, 0.4, initialZ]} key={`pawn-group-${pawn.id}`}>
+                {/* Farmer Body */}
+                <mesh castShadow position={[0, 0.4, 0]}>
+                    <cylinderGeometry args={[0.25, 0.35, 0.8, 12]} />
+                    <meshStandardMaterial color="#1e90ff" roughness={0.5} /> {/* Blue denim overalls */}
+                </mesh>
+
+                {/* Farmer Head */}
+                <mesh castShadow position={[0, 0.95, 0]}>
+                    <sphereGeometry args={[0.2, 16, 16]} />
+                    <meshStandardMaterial color="#ffe4c4" roughness={0.3} /> {/* Peach skin color */}
+                </mesh>
+
+                {/* Farmer Straw Hat (Cone + Flat Cylinder for brim) */}
+                <group position={[0, 1.1, 0]}>
+                    {/* Hat Brim */}
+                    <mesh castShadow position={[0, -0.05, 0]}>
+                        <cylinderGeometry args={[0.38, 0.38, 0.02, 16]} />
+                        <meshStandardMaterial color="#deb887" roughness={0.8} />
+                    </mesh>
+                    {/* Hat Cone */}
+                    <mesh castShadow>
+                        <coneGeometry args={[0.22, 0.22, 16]} />
+                        <meshStandardMaterial color="#deb887" roughness={0.8} />
+                    </mesh>
+                </group>
+
+                {/* Status and Inventory bubble */}
+                <Html distanceFactor={8} position={[0, 1.5, 0]} center>
+                    <div style={{
+                        background: "rgba(10, 25, 47, 0.9)",
+                        backdropFilter: "blur(4px)",
+                        color: "#64ffda",
+                        padding: "5px 10px",
+                        borderRadius: "8px",
+                        fontFamily: "'Outfit', sans-serif",
+                        fontSize: "11px",
+                        border: "1px solid #64ffda",
+                        boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
+                        width: "max-content",
+                        pointerEvents: "none",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "2px",
+                        alignItems: "center"
+                    }}>
+                        <div style={{ fontWeight: "bold", color: "#fff" }}>🤠 {pawn.name}</div>
+                        <div style={{ fontSize: "10px", color: "#8892b0" }}>{statusText}</div>
+                        <div style={{ display: "flex", gap: "6px", fontSize: "9px", marginTop: "2px", borderTop: "1px solid rgba(100,255,218,0.2)", paddingTop: "2px" }}>
+                            <span>🌰 {seeds}</span>
+                            <span>🌾 {wheat}</span>
+                            <span>💧 {waterCurrent}/{waterCap}</span>
+                        </div>
+                    </div>
+                </Html>
             </group>
-        )
+        );
     }
-        
 
     return (
-        <group>
-            {/* Game pawns will go here */}
-            <PawnView pawn={{id: 999, name: "Test Pawn", position: {id:999, x: 2, y: 2}, mesh: new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.6, 0.8), new THREE.MeshBasicMaterial({color: 'blue'}))}} />
+        <group name="game-pawns">
+            {pawns.map(pawn => (
+                <PawnView key={`pawn-view-${pawn.id}`} pawn={pawn} />
+            ))}
         </group>
-    )
+    );
 }

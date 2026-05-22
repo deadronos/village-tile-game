@@ -1,4 +1,3 @@
-
 .App {
     position: absolute;
     top: 0;
@@ -9,32 +8,274 @@
     display: flex;
 }
 
-.hud-ui {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 10; /* Ensure the HUD is above the canvas */
-    color: white;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* Allow clicks to pass through to the canvas */
-}
-
-.game-title {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-    color: white;
-    font-family: 'Arial', sans-serif;
-    font-size: 24px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-}
-
 .game-canvas {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  border: 1px solid #ccc;
-  background-color: black;
+  background-color: #0b0f19;
 }
+
+/* Glassmorphism Dashboard Panel */
+.hud-dashboard {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 320px;
+  max-height: calc(100vh - 40px);
+  background: rgba(15, 23, 42, 0.85); /* Slate 900 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 255, 218, 0.2); /* Teal border */
+  border-radius: 14px;
+  padding: 18px;
+  color: #e2e8f0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  z-index: 100;
+  pointer-events: auto; /* Allow interactions */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Scrollbar styling */
+.hud-dashboard::-webkit-scrollbar {
+  width: 6px;
+}
+.hud-dashboard::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+.hud-dashboard::-webkit-scrollbar-thumb {
+  background: rgba(100, 255, 218, 0.25);
+  border-radius: 3px;
+}
+
+.hud-header {
+  border-bottom: 1px solid rgba(100, 255, 218, 0.15);
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hud-header h2 {
+  font-size: 15px;
+  margin: 0;
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hud-tick-pill {
+  background: rgba(100, 255, 218, 0.12);
+  color: #64ffda;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid rgba(100, 255, 218, 0.25);
+}
+
+.hud-section {
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.hud-section h3 {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin: 0 0 10px 0;
+  color: #8892b0;
+}
+
+.speed-controls .button-group {
+  display: flex;
+  gap: 6px;
+}
+
+.speed-controls button {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a8b2d1;
+  padding: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.speed-controls button:hover {
+  background: rgba(100, 255, 218, 0.1);
+  color: #64ffda;
+  border-color: rgba(100, 255, 218, 0.35);
+}
+
+.speed-controls button.active {
+  background: #64ffda;
+  color: #0a192f;
+  border-color: #64ffda;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(100, 255, 218, 0.3);
+}
+
+.stats-grid {
+  display: flex;
+  gap: 10px;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.stat-card {
+  flex: 1;
+  background: rgba(30, 41, 59, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #8892b0;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ccd6f6;
+}
+
+.stat-value.highlight {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.25);
+}
+
+.farmer-status, .farmer-pos {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.farmer-status .label, .farmer-pos .label {
+  color: #8892b0;
+}
+
+.farmer-status .value {
+  color: #64ffda;
+  font-weight: 600;
+}
+
+.farmer-pos .value {
+  color: #ccd6f6;
+  font-family: monospace;
+}
+
+.farmer-inventory h4 {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #8892b0;
+  margin: 10px 0 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 8px;
+  letter-spacing: 0.5px;
+}
+
+.inventory-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inv-item {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+}
+
+.inv-item .icon {
+  width: 18px;
+  margin-right: 6px;
+  display: inline-block;
+  text-align: center;
+}
+
+.inv-item .name {
+  color: #8892b0;
+  flex: 1;
+}
+
+.inv-item .val {
+  font-weight: 700;
+  color: #ccd6f6;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.button-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-interact {
+  background: rgba(100, 255, 218, 0.08);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  color: #64ffda;
+  padding: 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-interact:hover {
+  background: rgba(100, 255, 218, 0.15);
+  border-color: #64ffda;
+  box-shadow: 0 4px 10px rgba(100, 255, 218, 0.12);
+}
+
+.console-logs {
+  background: rgba(10, 25, 47, 0.95);
+  border: 1px solid rgba(100, 255, 218, 0.12);
+}
+
+.console-box {
+  height: 110px;
+  overflow-y: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  color: #8892b0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.console-line {
+  line-height: 1.3;
+  opacity: 0.85;
+}
+
+.console-line:first-child {
+  color: #64ffda;
+  font-weight: 600;
+  opacity: 1;
+}
