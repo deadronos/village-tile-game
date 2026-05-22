@@ -175,6 +175,26 @@ export default function GameCrops({ maphasLoaded, gameState }: GameCropsProps): 
         }
     }, [plants]);
 
+    interface CropsViewProps {
+        plantid: number;
+        name: string;
+        positionx: number;
+        positiony: number;
+        mesh: THREE.Mesh;
+    }
+
+    function CropsView({plantid, name, positionx, positiony, mesh}: CropsViewProps): React.ReactElement | null {
+        if(positionx === undefined || positiony === undefined) {
+            console.error(`Plant entity ${name} is missing position data, cannot render`);
+            return null;
+        }
+        return (
+            <group name={`plantid-${plantid}-name-${name}`} key={`plantid-${plantid}`} position={[positionx * tilesizeX, getCachedYOffsetForGeometry(mesh.geometry as THREE.BoxGeometry), positiony * tilesizeY]}>
+                <primitive name={`plantid-${plantid}-name-${name}-mesh`} key={`plantid-${plantid}-name-${name}-mesh`} object={mesh} />
+            </group>
+        )
+    };
+
 return (
     <group>
         {/* Crop entities will be rendered here based on their position and type */}
@@ -183,18 +203,17 @@ return (
                 {/* Optionally render something when there are no plants to display */}
             </group>
         ) : (
-            plants.map(plant => {
-                if(!plant.position) {
-                    console.error(`Plant entity ${plant.name} is missing position data, cannot render`);
-                    return null;
-                }
-                return (
-                    <group key={plant.id} position={[plant.position.x * tilesizeX, getCachedYOffsetForGeometry(plant.mesh.geometry as THREE.BoxGeometry), plant.position.y * tilesizeY]}>
-                        <primitive object={plant.mesh} />
-                    </group>
-                )
-            })
-        )}  
+            plants.map((plant, k)=> (
+                <CropsView 
+                    key={k}
+                    plantid={plant.id}
+                    name={plant.name}
+                    positionx={plant.position?.x ?? 0} // default to 0 if position or x is undefined
+                    positiony={plant.position?.y ?? 0} // default to 0 if position or y is undefined
+                    mesh={plant.mesh}
+                />
+            ))
+        )}
     </group>
 )
 }
