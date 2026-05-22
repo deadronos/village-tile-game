@@ -5,12 +5,13 @@ import './App.css'
 import { ECSProvider } from './ecs/ecsProvider'
 import { GameContent } from './reactcomponents/GameContent'
 import { OrbitControls } from '@react-three/drei/core/OrbitControls'
-
+import HudUI from './reactcomponents/HudUI'
 
 function CanvasWrappedInECSProvider() {
   return (
     <ECSProvider>
       <Suspense fallback={<div>Loading...</div>}>
+        <HudUI />
         <Canvas className="game-canvas">
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />

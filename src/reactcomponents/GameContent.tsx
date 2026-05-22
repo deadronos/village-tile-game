@@ -6,6 +6,7 @@ import { Text } from '@react-three/drei';
 import { loadMap } from '../../public/assets/map/loadMap';
 import type { GameStateEntity, Entity } from '../ecs/ecs';
 import GameMap from './GameMap';
+import GameCrops from './GameCrops';
 
 
 
@@ -42,7 +43,8 @@ export function GameContent(): React.ReactElement {
     return (
         <group>
             {/* Game content will go here */}
-            <GameMap hasLoaded={mapHasLoaded} gameState={gameState}/>
+            <GameMap maphasLoaded={mapHasLoaded} gameState={gameState}/>
+            <GameCrops maphasLoaded={mapHasLoaded} gameState={gameState}/>
         </group>
     )
 }

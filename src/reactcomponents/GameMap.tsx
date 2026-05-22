@@ -6,22 +6,23 @@ import { Text } from '@react-three/drei'
 
 
 interface GameMapProps {
-    hasLoaded: boolean;
+    maphasLoaded: boolean;
     gameState: GameStateEntity | undefined;
 }
 
-export default function GameMap({ hasLoaded, gameState }: GameMapProps): React.ReactElement {
+export default function GameMap({ maphasLoaded, gameState }: GameMapProps): React.ReactElement {
     const [tiles, setTiles] = React.useState<TileEntity[]| null>(null);
     const tilesizeX= 1  // in R3F world units, which are equivalent to tiles in our game logic, so 1 means 1 tile
     const tilesizeY= 1  // in R3F world units, which are equivalent to tiles in our game logic, so 1 means 1 tile
     const [tilemap, setTilemap] = React.useState<number[][] | null>(null);
+    
 
     useEffect(() => {
         if(!gameState) {
             console.error("GameStateEntity is undefined in GameMap component");
             return;
         }
-        if(!hasLoaded) {
+        if(!maphasLoaded) {
             console.log('GameMap component detected map has not loaded yet');
             return;
         }
@@ -48,7 +49,7 @@ export default function GameMap({ hasLoaded, gameState }: GameMapProps): React.R
         return () => {
             console.log('GameMap component unmounted');
         }
-    }, [hasLoaded, gameState]);
+    }, [maphasLoaded, gameState]);
 
     useEffect(()=>{
         if(tiles) {
