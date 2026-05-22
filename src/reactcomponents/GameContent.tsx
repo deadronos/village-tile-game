@@ -7,6 +7,7 @@ import { loadMap } from '../../public/assets/map/loadMap';
 import type { GameStateEntity, Entity } from '../ecs/ecs';
 import GameMap from './GameMap';
 import GameCrops from './GameCrops';
+import GamePawns from './GamePawns';
 
 
 
@@ -45,6 +46,7 @@ export function GameContent(): React.ReactElement {
             {/* Game content will go here */}
             <GameMap maphasLoaded={mapHasLoaded} gameState={gameState}/>
             <GameCrops maphasLoaded={mapHasLoaded} gameState={gameState}/>
+            <GamePawns maphasLoaded={mapHasLoaded} gameState={gameState}/>
         </group>
     )
 }
