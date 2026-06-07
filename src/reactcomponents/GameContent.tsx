@@ -23,11 +23,11 @@ export function GameContent(): React.ReactElement {
     const gameState = world.entities.find((entity): entity is GameStateEntity => 'gameTick' in entity);
 
     const onTickUpdate = () => {
-        setTickCount(t => t + 1);
+        setTickCount((prev) => prev + 1);
     };
 
     const onLogAdded = () => {
-        setLogCount(l => l + 1);
+        setLogCount((prev) => prev + 1);
     };
 
     React.useEffect(() => {
